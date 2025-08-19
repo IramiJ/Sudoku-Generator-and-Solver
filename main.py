@@ -6,6 +6,8 @@ class MainWindow(QMainWindow):
   super().__init__()
   self.setWindowTitle("Sudoku")
   self.setGeometry(0,0,450,450)
+  self.setMaximumHeight(450)
+  self.setMaximumWidth(450)
   self.initUI()
 
  def initUI(self):
@@ -29,6 +31,8 @@ class MainWindow(QMainWindow):
     btn = QPushButton(str(n))
     btn.clicked.connect(lambda _, num=n: self.select_number(num))
     self.statusBar().addPermanentWidget(btn)
+  grid.setSpacing(0)
+  grid.setContentsMargins(0,0,0,0)
 
  def select_number(self, num):
   self.selected_num = num
