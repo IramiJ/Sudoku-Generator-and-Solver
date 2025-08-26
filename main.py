@@ -1,6 +1,8 @@
-import sys
+import sys, random
 from PyQt5.QtWidgets import (QApplication, QMainWindow, QLabel, QWidget, QLineEdit, QGridLayout, QPushButton)
 from PyQt5.QtCore import Qt
+
+
 class MainWindow(QMainWindow):
  def __init__(self):
   super().__init__()
@@ -19,8 +21,12 @@ class MainWindow(QMainWindow):
     btn = QPushButton(str(n))
     btn.clicked.connect(lambda _, num=n: self.select_number(num))
     self.statusBar().addPermanentWidget(btn)
+
+
   cells = []
   grid = QGridLayout()
+
+
   for row in range(9):
    row_cells = []
    for col in range(9):
@@ -36,14 +42,17 @@ class MainWindow(QMainWindow):
       self.setStyleSheet("background-color: yellow;")
       if self.mainwindow.selected_number is not None:
         self.setText(self.mainwindow.selected_number)
+      print(cells)
       super().focusInEvent(event)
      def focusOutEvent(self, event):
       self.setStyleSheet("")
       super().focusOutEvent(event)
+
     c = cell(self)
     grid.addWidget(c, row, col)
-    row_cells.append(cells)
-  cells.append(row_cells)
+    row_cells.append(c)
+   cells.append(row_cells)
+  generate_board(cells)
   central_widget.setLayout(grid)
   
   grid.setSpacing(0)
@@ -53,6 +62,12 @@ class MainWindow(QMainWindow):
   self.selected_number = str(num)
   self.statusBar().showMessage(f"Selected number: {num}", 0)
 
+def generate_board(board):
+ for i in range(25):
+  row = random.randint(0, 7)
+  column = random.randint(0, 7)
+  c = board[row][column]
+  c.setText(str(random.randint(1,9)))
 
 def main():
  app = QApplication(sys.argv)
