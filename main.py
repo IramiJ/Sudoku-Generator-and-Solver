@@ -52,6 +52,7 @@ class MainWindow(QMainWindow):
     grid.addWidget(c, row, col)
     row_cells.append(c)
    cells.append(row_cells)
+   
   generate_board(cells)
   central_widget.setLayout(grid)
   
@@ -64,10 +65,30 @@ class MainWindow(QMainWindow):
 
 def generate_board(board):
  for i in range(25):
-  row = random.randint(0, 7)
-  column = random.randint(0, 7)
+  numbers = ["1", "2", "3", "4", "5", "6", "7", "8", "9"]
+  row = random.randint(0, 8)
+  column = random.randint(0, 8)
+  section = []
+  for i in range(9):
+   section.append(board[row][i])
+  for i in range(9):
+   section.append(board[i][column])
+  
+
+# "Determining the Square section "     
+  square_width = row // 3
+  square_height = column // 3
+  for width in range(3):
+   for height in range(3):
+    section.append(board[square_width*3+width][square_height*3+height])
+
+  for cell in section:
+   if cell.text is not None and cell.text in numbers:
+    numbers.remove(cell.text)
+
   c = board[row][column]
-  c.setText(str(random.randint(1,9)))
+  index = random.randint(0, len(numbers)-1)
+  c.setText(numbers[index])
 
 def main():
  app = QApplication(sys.argv)
