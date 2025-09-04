@@ -52,7 +52,9 @@ class MainWindow(QMainWindow):
     row_cells.append(c)
    cells.append(row_cells)
    
-  generate_board(cells)
+#  generate_board(cells)
+  board = generate_puzzle()
+  sync_to_gui(board, cells)
   central_widget.setLayout(grid)
   
   grid.setSpacing(0)
@@ -62,32 +64,109 @@ class MainWindow(QMainWindow):
   self.selected_number = str(num)
   self.statusBar().showMessage(f"Selected number: {num}", 0)
 
-def generate_board(board):
- for i in range(25):
-  numbers = ["1", "2", "3", "4", "5", "6", "7", "8", "9"]
-  row = random.randint(0, 8)
-  column = random.randint(0, 8)
-  section = []
-  for i in range(9):
-   section.append(board[row][i])
-  for i in range(9):
-   section.append(board[i][column])
+def is_valid(board, row, col, num):
+ if num in board[row]:
+  return False
+ if num in [board[r][col] for r in range(9)]:
+  return False
+ start_row, start_col = 3 * (row // 3), 3 * (col // 3)
+ for r in range(start_row, start_row + 3):
+  for c in range(start_col, start_col + 3):
+   if board[r][c] == num:
+    return False
+ return True
+
+def find_empty(board):
+ for r in range(9):
+  for c in range(9):
+   if board[r][c] == 0:
+    return r, c
+ return None
+
+def fill_board(board):
+ empty = find_empty(board)
+ if not empty:
+  return True
+ row, col = empty
+ numbers = list(range(1, 10))
+ random.shuffle(numbers)
+ for num in numbers:
+  if is_valid(board, row, col, num):
+   board[row][col] = num
+   if fill_board(board):
+    return True
+   board[row][col] = 0
+ return False
+
+def count_solutions(board):
+ empty = find_empty(board)
+ if not empty:
+  return 1
+ row, col = empty
+ count = 0
+ for num in range(1, 10):
+  if is_valid(board, row, col, num):
+   board[row][col] = num
+   count += count_solutions(board)
+   board[row][col] = 0
+   if count > 1:
+    break
+ return count
+
+def generate_puzzle(removals=30):
+ board = [[0 for _ in range(9)] for _ in range(9)]
+ fill_board(board)
+ attempts = removals
+ while attempts > 0:
+  row, col = random.randint(0, 8), random.randint(0, 8)
+  while board[row][col] == 0:
+   row, col = random.randint(0, 8), random.randint(0, 8)
+  backup = board[row][col]
+  board[row][col] = 0
+  board_copy = [r[:] for r in board]
+  if count_solutions(board_copy) != 1:
+   board[row][col] = backup
+   attempts -= 1
+ return board
+
+def sync_to_gui(board, qlineedit_board):
+ for row in range(9):
+  for col in range(9):
+   value = board[row][col]
+   cell = qlineedit_board[row][col]
+   if value == 0:
+    cell.clear()
+    cell.setReadOnly(False)
+   else:
+    cell.setText(str(value))
+    cell.setReadOnly(True)
+
+# def generate_board(board):
+#  for i in range(25):
+#   numbers = ["1", "2", "3", "4", "5", "6", "7", "8", "9"]
+#   row = random.randint(0, 8)
+#   column = random.randint(0, 8)
+#   section = []
+#   for i in range(9):
+#    section.append(board[row][i])
+#   for i in range(9):
+#    section.append(board[i][column])
   
 
-# "Determining the Square section "     
-  square_width = row // 3
-  square_height = column // 3
-  for width in range(3):
-   for height in range(3):
-    section.append(board[square_width*3+width][square_height*3+height])
+# # "Determining the Square section "     
+#   square_width = row // 3
+#   square_height = column // 3
+#   for width in range(3):
+#    for height in range(3):
+#     section.append(board[square_width*3+width][square_height*3+height])
 
-  for cell in section:
-   if cell.text() is not None and cell.text() in numbers:
-    numbers.remove(cell.text())
+#   for cell in section:
+#    if cell.text() is not None and cell.text() in numbers:
+#     numbers.remove(cell.text())
 
-  c = board[row][column]
-  index = random.randint(0, len(numbers)-1)
-  c.setText(numbers[index])
+#   c = board[row][column]
+#   index = random.randint(0, len(numbers)-1)
+#   c.setText(numbers[index])
 
 def main():
  app = QApplication(sys.argv)
