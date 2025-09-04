@@ -42,7 +42,6 @@ class MainWindow(QMainWindow):
       self.setStyleSheet("background-color: yellow;")
       if self.mainwindow.selected_number is not None:
         self.setText(self.mainwindow.selected_number)
-      print(cells)
       super().focusInEvent(event)
      def focusOutEvent(self, event):
       self.setStyleSheet("")
@@ -83,8 +82,8 @@ def generate_board(board):
     section.append(board[square_width*3+width][square_height*3+height])
 
   for cell in section:
-   if cell.text is not None and cell.text in numbers:
-    numbers.remove(cell.text)
+   if cell.text() is not None and cell.text() in numbers:
+    numbers.remove(cell.text())
 
   c = board[row][column]
   index = random.randint(0, len(numbers)-1)
