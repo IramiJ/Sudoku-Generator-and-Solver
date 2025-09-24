@@ -25,12 +25,7 @@ class MainWindow(QMainWindow):
 
   cells = []
   grid = QGridLayout()
-
-
-  for row in range(9):
-   row_cells = []
-   for col in range(9):
-    class cell(QLineEdit):
+  class cell(QLineEdit):
      def __init__(self, mainwindow):
       super().__init__()
       self.mainwindow = mainwindow
@@ -38,27 +33,42 @@ class MainWindow(QMainWindow):
       self.setMaxLength(1)
       self.setAlignment(Qt.AlignHCenter)
       self.setReadOnly(True)
+      self.preset = False
      def focusInEvent(self, event):
-      self.setStyleSheet("background-color: yellow;")
-      if self.mainwindow.selected_number is not None:
+      if self.mainwindow.selected_number is not None and not self.preset:
         self.setText(self.mainwindow.selected_number)
       super().focusInEvent(event)
      def focusOutEvent(self, event):
       self.setStyleSheet("")
       super().focusOutEvent(event)
+     def enterEvent(self, event):
+      if self.preset == False:
+       self.setStyleSheet("background-color: red;")
+#       self.setText(self.mainwindow.selected_number)
+      super().enterEvent(event)
+     def leaveEvent(self, event):
+      if self.preset == False:
+       self.setStyleSheet("")
+      super().leaveEvent(event)
+   
 
+  for row in range(9):
+   row_cells = []
+   for col in range(9):
     c = cell(self)
     grid.addWidget(c, row, col)
     row_cells.append(c)
    cells.append(row_cells)
    
 #  generate_board(cells)
-  board = generate_puzzle()
-  sync_to_gui(board, cells)
+  
   central_widget.setLayout(grid)
   
   grid.setSpacing(0)
   grid.setContentsMargins(0,0,0,0)
+
+  board = generate_puzzle()
+  sync_to_gui(board, cells)
 
  def select_number(self, num):
   self.selected_number = str(num)
@@ -113,7 +123,7 @@ def count_solutions(board):
     break
  return count
 
-def generate_puzzle(removals=30):
+def generate_puzzle(removals=10):
  board = [[0 for _ in range(9)] for _ in range(9)]
  fill_board(board)
  attempts = removals
@@ -136,10 +146,10 @@ def sync_to_gui(board, qlineedit_board):
    cell = qlineedit_board[row][col]
    if value == 0:
     cell.clear()
-    cell.setReadOnly(False)
    else:
     cell.setText(str(value))
-    cell.setReadOnly(True)
+    cell.preset = True
+    cell.setStyleSheet("background-color: #c2bebe;")
 
 # def generate_board(board):
 #  for i in range(25):
